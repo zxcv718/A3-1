@@ -61,6 +61,17 @@ def order_corners(points: NDArray[np.number]) -> Corners:
     return np.roll(corners, -start, axis=0)
 
 
+def preprocess(image: Image, blur: int) -> tuple[Image, Image]:
+    """BGR 배열을 회색조로 바꾸어 원본과 가우시안 블러 결과를 반환한다."""
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return gray, cv2.GaussianBlur(gray, (blur, blur), 0)
+
+
+def detect_edges(blurred: Image, low: int, high: int) -> Image:
+    """블러를 적용한 회색조 배열에서 0과 255로 구성된 엣지 영상을 찾는다."""
+    return cv2.Canny(blurred, low, high)
+
+
 def find_document(edges: Image) -> Corners | None:
     contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     min_area = edges.size * MIN_AREA_RATIO
@@ -108,9 +119,8 @@ def scan(image: Image, settings: ScanSettings = ScanSettings()) -> ScanResult:
         size = (max(1, round(width * scale)), max(1, round(height * scale)))
         preview = cv2.resize(image, size, interpolation=cv2.INTER_AREA)
 
-    gray = cv2.cvtColor(preview, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (settings.blur, settings.blur), 0)
-    edges = cv2.Canny(blurred, settings.canny_low, settings.canny_high)
+    gray, blurred = preprocess(preview, settings.blur)
+    edges = detect_edges(blurred, settings.canny_low, settings.canny_high)
     overlay = preview.copy()
     corners = find_document(edges)
     if corners is None:

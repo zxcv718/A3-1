@@ -4,7 +4,14 @@ import unittest
 import cv2
 import numpy as np
 
-from scanner import ScanSettings, order_corners, scan, warp_document
+from scanner import (
+    ScanSettings,
+    detect_edges,
+    order_corners,
+    preprocess,
+    scan,
+    warp_document,
+)
 
 
 def sample_page():
@@ -18,6 +25,34 @@ def sample_page():
 
 
 class ScannerTest(unittest.TestCase):
+    def test_preprocess_converts_bgr_and_spreads_a_bright_pixel(self):
+        image = np.zeros((5, 5, 3), dtype=np.uint8)
+        image[2, 2] = (0, 0, 255)
+
+        gray, blurred = preprocess(image, 3)
+
+        self.assertEqual(gray.shape, (5, 5))
+        self.assertEqual(blurred.shape, gray.shape)
+        self.assertEqual(gray.dtype, np.uint8)
+        self.assertEqual(blurred.dtype, np.uint8)
+        self.assertEqual(gray[2, 2], 76)
+        self.assertEqual(blurred[2, 2], 19)
+        self.assertEqual(gray[2, 1], 0)
+        self.assertGreater(blurred[2, 1], 0)
+
+    def test_detect_edges_marks_the_brightness_boundary(self):
+        blurred = np.full((24, 32), 20, dtype=np.uint8)
+        blurred[:, 16:] = 240
+
+        edges = detect_edges(blurred, 25, 80)
+
+        self.assertEqual(edges.shape, blurred.shape)
+        self.assertEqual(edges.dtype, np.uint8)
+        self.assertEqual(set(np.unique(edges)), {0, 255})
+        rows, columns = np.nonzero(edges)
+        np.testing.assert_array_equal(rows, np.arange(24))
+        self.assertTrue(np.all((15 <= columns) & (columns <= 16)))
+
     def test_orders_shuffled_points_even_when_two_sums_match(self):
         points = np.array([[100, 25], [175, 100], [100, 175], [25, 100]])
         np.testing.assert_array_equal(order_corners(points[[3, 2, 0, 1]]), points)

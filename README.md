@@ -44,12 +44,16 @@ python main.py '사진.jpg' --no-gui --blur 5 --canny-low 50 --canny-high 150
 | --- | --- | --- |
 | `main.read_image` | 이미지 경로 `Path` | `(H, W, 3)`의 `uint8` 배열. 채널 순서는 BGR입니다. |
 | `scanner.scan` | BGR `uint8` 배열과 `ScanSettings` | `ScanResult`. `original`과 `overlay`는 BGR 미리보기, `preprocessed`와 `edges`는 2차원 `uint8` 배열입니다. `corners`는 미리보기 좌표이고 `scanned`는 2차원 `uint8` 스캔본입니다. 후보가 없으면 두 필드는 `None`입니다. |
+| `scanner.preprocess` | BGR `uint8` 배열과 홀수 블러 커널 크기 | `(회색조 원본, 블러 결과)`. 둘 다 `(H, W)`의 `uint8` 배열입니다. |
+| `scanner.detect_edges` | 블러를 적용한 회색조 배열과 `low`, `high` 임계값 | `(H, W)`의 `uint8` 엣지 영상. 경계는 `255`, 나머지는 `0`입니다. |
 | `scanner.find_document`, `scanner.order_corners` | 각각 `(H, W)`의 엣지 배열과 `(4, 2)`로 해석할 수 있는 점 4개 | 좌상부터 시계 방향으로 정렬한 `(4, 2)`의 `float32` 좌표. `find_document`는 후보가 없으면 `None`을 반환합니다. |
 | `scanner.warp_document` | `(H, W)` 회색조 배열과 정렬한 `(4, 2)` 점 | `(출력 높이, 출력 너비)`의 평탄화 배열. 입력과 같은 픽셀 자료형입니다. |
 | `main.save_image` | 출력 경로 `Path`와 이미지 배열 | 성공하면 `None`을 반환하고, 지원하지 않는 확장자나 저장 실패는 예외로 알립니다. |
 | `evaluate.compare_outline` | 예측 점 4개, 기준 점 4개, 같은 좌표계의 `(H, W)` | `(IoU, 정규화한 최대 모서리 오차)` 두 실수. |
 
 화면 좌표 `(x, y)`는 배열의 `image[y, x]`에 대응합니다. 컬러 배열에서 `image[y, x, 0]`은 파랑이고, 회색조 배열은 픽셀마다 밝기 하나만 저장합니다.
+
+전처리와 엣지 검출을 분리해 회색조 변환과 블러의 결과, Canny가 경계로 표시한 위치를 각각 테스트할 수 있습니다. `scan()`은 두 단계를 연결하고 엣지 영상으로부터 문서 윤곽선을 찾습니다.
 
 ### 네 점 정렬과 투시 변환
 
