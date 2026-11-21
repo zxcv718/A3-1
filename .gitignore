@@ -1,0 +1,21 @@
+# 로컬 환경과 캐시
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+.env
+.env.*
+
+# 로컬 과제 자료와 작업 기록
+/.omx/
+/docs/troubleshooting/
+/문서-스캐너-핵심개념.html
+/휴대폰으로 찍은 종이를 똑바르게 펴서 스캔하게 만들기.md
+
+# 예시 명령이 로컬에서 생성하는 파일
+*_scanned.png
+/scan.png
+/brightness.png
