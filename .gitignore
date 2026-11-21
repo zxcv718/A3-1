@@ -9,6 +9,9 @@ __pycache__/
 .env
 .env.*
 
+# 로컬 개발 검증
+/tests/
+
 # 로컬 과제 자료와 작업 기록
 /.omx/
 /docs/troubleshooting/

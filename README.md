@@ -8,7 +8,7 @@
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-python main.py '사진.jpg'
+python main.py evaluation/images/front_02_letter001_frame_0072.jpeg
 ```
 
 GUI는 `1. Original`(원본) → `2. Preprocessed`(전처리) → `3. Edges`(엣지) → `4. Contour`(윤곽선) → `5. Result`(스캔 결과) 순으로 표시합니다. `2. Preprocessed` 창의 슬라이더로 블러와 Canny 임계값을 조절합니다. `s`로 저장하고 `q` 또는 `Esc`로 종료합니다. 기본 저장 경로는 입력 사진 옆의 `사진_scanned.png`입니다.
@@ -61,10 +61,9 @@ python main.py '사진.jpg' --no-gui --blur 5 --canny-low 50 --canny-high 150
 2. 연속된 변의 외적 부호로 볼록성을 확인하고, `x+y`가 가장 작은 점부터 목록을 시작합니다. 합이 같으면 `y`가 더 작은 점을 선택합니다. 예를 들어 뒤섞인 `(180,40)`, `(40,155)`, `(60,30)`, `(205,165)`는 `(60,30)` → `(180,40)` → `(205,165)` → `(40,155)` 순서가 됩니다.
 3. `getPerspectiveTransform`은 정렬한 원본 네 점과 출력 직사각형의 네 점을 받아 `3×3` 변환 행렬을 만듭니다. `warpPerspective`는 그 행렬과 출력 `(너비, 높이)`를 받아 픽셀을 채웁니다. 너비는 위·아래 변 중 긴 쪽, 높이는 왼쪽·오른쪽 변 중 긴 쪽의 픽셀 거리를 반올림해 구합니다. 원근 때문에 한쪽 변이 짧게 찍힌 경우에도 그 짧은 거리만 기준으로 출력 크기를 줄이는 일을 피할 수 있습니다.
 
-## 검증 및 평가 재현
+## 평가 재현
 
 ```sh
-python -m unittest discover -s tests -v
 python evaluate.py evaluation/sources.csv
 ```
 
